@@ -729,7 +729,7 @@ def insert_data(parcels, results, blocks, streets, areas):
         ('2025-10-15', 'Roslindale Neighborhood Housing Community Meeting', NULL, NULL, 'public_meeting', %s, true),
         ('2025-01-13', 'Neighborhood Housing — Citywide Virtual Public Meeting', NULL, 'Virtual Meeting', 'public_meeting', %s, true)
         ON CONFLICT DO NOTHING
-    """, tuple([city_url] * 30))
+    """, tuple([city_url] * 29))
 
     conn.commit()
     cur.close()
