@@ -128,7 +128,7 @@ export default function SourcesPage() {
           <p>
             All 21 calculation formulas (B1–B21) are documented in the{' '}
             <a
-              href='https://github.com/the-last-unicorn/west-roxbury-zoning'
+              href='https://github.com/this-is-the-last-unicorn/west-roxbury-zoning'
               target='_blank'
               rel='noopener noreferrer'
               className='underline'

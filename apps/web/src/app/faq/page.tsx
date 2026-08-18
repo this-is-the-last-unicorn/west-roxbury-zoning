@@ -113,7 +113,7 @@ export default function FaqPage() {
             values (like setback estimates) are approximations. All limitations are clearly noted on
             each property page. You can review the{' '}
             <a
-              href='https://github.com/the-last-unicorn/west-roxbury-zoning'
+              href='https://github.com/this-is-the-last-unicorn/west-roxbury-zoning'
               target='_blank'
               rel='noopener noreferrer'
               className='underline text-[#2E5090]'
@@ -129,12 +129,12 @@ export default function FaqPage() {
           <p className='text-[#475569]'>
             Yes. The full codebase is available at{' '}
             <a
-              href='https://github.com/the-last-unicorn/west-roxbury-zoning'
+              href='https://github.com/this-is-the-last-unicorn/west-roxbury-zoning'
               target='_blank'
               rel='noopener noreferrer'
               className='underline text-[#2E5090]'
             >
-              github.com/the-last-unicorn/west-roxbury-zoning
+              github.com/this-is-the-last-unicorn/west-roxbury-zoning
             </a>{' '}
             under the{' '}
             <a

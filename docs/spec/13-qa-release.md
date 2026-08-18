@@ -64,7 +64,7 @@ Each item references its formula in [10-data-and-calcs.md](10-data-and-calcs.md)
 
 | Component           | Provider                            | Notes                                                                          |
 | ------------------- | ----------------------------------- | ------------------------------------------------------------------------------ |
-| **Code repository** | GitHub (public)                     | `github.com/the-last-unicorn/west-roxbury-zoning` — MIT license                |
+| **Code repository** | GitHub (public)                     | `github.com/this-is-the-last-unicorn/west-roxbury-zoning` — MIT license        |
 | **Domain**          | `westroxburyzoning.org`             | Cloudflare DNS + CDN + DDoS protection                                         |
 | **Hosting**         | Render                              | Web service + PostgreSQL                                                       |
 | **Database**        | PostgreSQL on Render (with PostGIS) | All pre-computed results, corrections, feedback, meetings                      |

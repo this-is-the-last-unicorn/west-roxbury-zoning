@@ -77,7 +77,7 @@ export function Footer() {
                 <span>
                   100% open source —{' '}
                   <a
-                    href='https://github.com/the-last-unicorn/west-roxbury-zoning'
+                    href='https://github.com/this-is-the-last-unicorn/west-roxbury-zoning'
                     target='_blank'
                     rel='noopener noreferrer'
                     className='text-white/70 hover:text-white underline underline-offset-2'
