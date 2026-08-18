@@ -106,7 +106,9 @@ export function MapView() {
 
       m.on('mousemove', 'parcels-fill', e => {
         if (!e.features?.length) return
-        const feat = e.features[0]
+        const feat = e.features[0] as mapboxgl.GeoJSONFeature & {
+          properties: Record<string, string>
+        }
         const id = String(feat.properties?.id ?? '')
         if (!id) return
 
@@ -158,7 +160,9 @@ export function MapView() {
 
       m.on('click', 'parcels-fill', e => {
         if (!e.features?.length) return
-        const id = e.features[0].properties?.id
+        const id = (
+          e.features[0] as mapboxgl.GeoJSONFeature & { properties: Record<string, string> }
+        ).properties?.id
         if (id) {
           router.push(`/property/${id}`)
         }
