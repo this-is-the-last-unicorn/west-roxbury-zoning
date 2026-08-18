@@ -1,0 +1,81 @@
+name: Release & Deploy
+
+on:
+  pull_request:
+    types: [closed]
+    branches: [main]
+
+jobs:
+  release-and-deploy:
+    if: github.event.pull_request.merged == true
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      pull-requests: read
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@08eba0b27e820071cde6df949e0beb9ba4906955
+        with:
+          fetch-depth: 0
+          fetch-tags: true
+
+      - name: Setup Node.js
+        uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020
+        with:
+          node-version: '22'
+
+      - name: Generate Release Notes & Create GitHub Release
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          CLAUDE_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+          NOTION_TOKEN: ${{ secrets.NOTION_TOKEN }}
+          NOTION_DATABASE_ID: ${{ secrets.NOTION_DATABASE_ID }}
+          GITHUB_EVENT_PATH: ${{ github.event_path }}
+          GITHUB_REPOSITORY: ${{ github.repository }}
+        run: node ./scripts/release-notes/index.mjs
+
+      - name: Trigger Render Deployments
+        run: |
+          deploy_service() {
+            local name=$1
+            local hook=$2
+
+            if [ -z "$hook" ]; then
+              echo "Skipping $name - no deploy hook configured"
+              return 0
+            fi
+
+            RESPONSE=$(curl -s -w "\n%{http_code}" -X POST "$hook")
+            STATUS=$(echo "$RESPONSE" | tail -n1)
+
+            if [ "$STATUS" != "200" ] && [ "$STATUS" != "201" ]; then
+              echo "ERROR: $name deploy failed with status $STATUS"
+              return 1
+            fi
+            echo "$name deployment triggered"
+          }
+
+          FAILED=0
+          deploy_service "Web" "${{ secrets.RENDER_WEB_DEPLOY_HOOK }}" || FAILED=1
+          deploy_service "API" "${{ secrets.RENDER_API_DEPLOY_HOOK }}" || FAILED=1
+          deploy_service "Workers" "${{ secrets.RENDER_WORKERS_DEPLOY_HOOK }}" || FAILED=1
+
+          if [ "$FAILED" -eq 1 ]; then
+            echo "One or more deployments failed"
+            exit 1
+          fi
+
+          echo "All deployments triggered"
+
+      - name: Notify on Deploy Failure
+        if: failure()
+        uses: actions/github-script@f28e40c7f34bde8b3046d885e986cb6290c5673b
+        with:
+          script: |
+            github.rest.issues.createComment({
+              issue_number: context.payload.pull_request.number,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              body: '**Deployment failed**\n\nThe PR was merged but one or more steps failed (release notes or Render deploy). Check the workflow logs and manually trigger deploys from the [Render Dashboard](https://dashboard.render.com) if needed.'
+            })

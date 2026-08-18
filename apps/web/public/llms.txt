@@ -1,0 +1,64 @@
+# West Roxbury Zoning Analysis
+# https://westroxburyzoning.org
+# Open source civic data — MIT License
+
+> What is this site?
+An independent, open-source tool that analyzes Boston's proposed residential zoning changes for every parcel in West Roxbury. It translates the city's draft zoning text into plain-language, property-specific information. Not affiliated with the City of Boston.
+
+> Who made it?
+Created by Emily Gamble. Built by The Last Unicorn, LLC (lastunicorn.io).
+
+> What data does it use?
+All data comes from public government sources:
+- Boston Planning Dept proposed zoning polygons (gis.bostonplans.org)
+- Boston GIS parcel boundaries (data.boston.gov)
+- City of Boston assessor records FY2026 (data.boston.gov)
+- Draft zoning text from bostonplans.org/neighborhood-housing
+- Current zoning code Article 56
+- MassGIS road network
+
+> Public API
+Free, no API key required. Rate limited to 100 requests/minute.
+
+Search for a property:
+  GET https://westroxburyzoning.org/api/search?q=156 bellevue
+  Returns: array of { gisId, address, proposedDistrict }
+
+Get full property analysis:
+  GET https://westroxburyzoning.org/api/property/{GIS_ID}
+  Returns: parcel details, current vs proposed comparison, summary of changes
+  Example: GET /api/property/2002226000
+
+Get street-level aggregate:
+  GET https://westroxburyzoning.org/api/street/{slug}
+  Returns: all properties on the street, district distribution, impact stats
+  Example: GET /api/street/bellevue-st
+
+Get sub-neighborhood stats:
+  GET https://westroxburyzoning.org/api/area/{slug}
+  Slugs: bellevue-hill, centre-street-village, lagrange, the-parkway, holy-name, spring-street-baker
+
+Get West Roxbury overview:
+  GET https://westroxburyzoning.org/api/overview
+
+Get meeting schedule:
+  GET https://westroxburyzoning.org/api/meetings
+
+> Proposed zoning districts in West Roxbury
+RD-2: Up to 2 dwelling units, no parking required (1,350 parcels)
+RD-3: Up to 3 dwelling units, no parking required (7,104 parcels — most common)
+RD-4: Up to 4 dwelling units, no parking required (450 parcels)
+RG-15: Large lots, 1 unit (26 parcels)
+RG-50: Up to 2 units (11 parcels)
+MFR: Multifamily, no unit cap (67 parcels)
+
+> Key facts
+- 9,569 total parcels in West Roxbury
+- 9,008 parcels have a proposed residential zoning change
+- 156 Bellevue ST (GIS_ID: 2002226000) is proposed as RD-3
+- District assignment is via spatial join against city's official GIS polygon layer
+- All code and calculations: github.com/the-last-unicorn/west-roxbury-zoning
+
+> Source code
+https://github.com/the-last-unicorn/west-roxbury-zoning
+MIT License — use freely with attribution.

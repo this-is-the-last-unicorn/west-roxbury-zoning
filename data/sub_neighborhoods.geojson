@@ -1,0 +1,156 @@
+{
+  "type": "FeatureCollection",
+  "features": [
+    {
+      "type": "Feature",
+      "properties": {
+        "slug": "bellevue-hill",
+        "name": "Bellevue Hill",
+        "description": "Boston's highest natural point at 330 ft. Bounded by Centre Street, West Roxbury Parkway, Washington Street, and Saint Theresa Avenue. Home to the Bellevue Hill Improvement Association.",
+        "boundary_type": "locally_recognized",
+        "approximate": true
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [-71.158, 42.2835],
+            [-71.1435, 42.2835],
+            [-71.142, 42.278],
+            [-71.1425, 42.274],
+            [-71.152, 42.274],
+            [-71.1575, 42.2745],
+            [-71.158, 42.279],
+            [-71.158, 42.2835]
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "slug": "centre-street",
+        "name": "Centre Street Village",
+        "description": "The historic West Roxbury village center along Centre Street, from Spring Street to Temple Street. Main commercial strip and civic core.",
+        "boundary_type": "locally_recognized",
+        "approximate": true
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [-71.174, 42.281],
+            [-71.16, 42.284],
+            [-71.158, 42.279],
+            [-71.158, 42.2745],
+            [-71.16, 42.27],
+            [-71.17, 42.269],
+            [-71.174, 42.272],
+            [-71.174, 42.281]
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "slug": "lagrange",
+        "name": "LaGrange",
+        "description": "Residential area along the LaGrange Street corridor, between VFW Parkway and West Roxbury Parkway. Includes the area around Mount Vernon and Perham streets.",
+        "boundary_type": "locally_recognized",
+        "approximate": true
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [-71.174, 42.297],
+            [-71.158, 42.297],
+            [-71.158, 42.284],
+            [-71.16, 42.284],
+            [-71.174, 42.281],
+            [-71.174, 42.297]
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "slug": "parkway",
+        "name": "The Parkway",
+        "description": "Northeastern West Roxbury along West Roxbury Parkway, from Bellevue Hill north toward Brookline. Includes Manthorne, Church, Russett, and Maple streets.",
+        "boundary_type": "locally_recognized",
+        "approximate": true
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [-71.158, 42.297],
+            [-71.143, 42.297],
+            [-71.13, 42.302],
+            [-71.125, 42.295],
+            [-71.135, 42.288],
+            [-71.1435, 42.2835],
+            [-71.158, 42.2835],
+            [-71.158, 42.297]
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "slug": "holy-name",
+        "name": "Holy Name",
+        "description": "Residential area south of Centre Street, centered around Holy Name Parish. Includes the area between Washington Street and Stimson/Keystone streets.",
+        "boundary_type": "locally_recognized",
+        "approximate": true
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [-71.17, 42.269],
+            [-71.16, 42.27],
+            [-71.158, 42.2745],
+            [-71.152, 42.274],
+            [-71.1425, 42.274],
+            [-71.142, 42.265],
+            [-71.15, 42.258],
+            [-71.16, 42.256],
+            [-71.17, 42.258],
+            [-71.17, 42.269]
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "slug": "spring-baker",
+        "name": "Spring Street / Baker",
+        "description": "Western residential area around Spring Street and Baker Street, between Centre Street and VFW Parkway. Includes Millennium Park and Brook Farm historic site.",
+        "boundary_type": "locally_recognized",
+        "approximate": true
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [-71.191, 42.297],
+            [-71.174, 42.297],
+            [-71.174, 42.281],
+            [-71.174, 42.272],
+            [-71.17, 42.269],
+            [-71.17, 42.258],
+            [-71.18, 42.256],
+            [-71.191, 42.26],
+            [-71.191, 42.297]
+          ]
+        ]
+      }
+    }
+  ]
+}

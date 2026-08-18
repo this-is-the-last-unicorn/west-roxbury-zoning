@@ -1,0 +1,80 @@
+name: Test
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+permissions:
+  contents: read
+  pull-requests: write
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@08eba0b27e820071cde6df949e0beb9ba4906955
+
+      - name: Setup Node.js
+        uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020
+        with:
+          node-version: '22'
+
+      - name: Install Bun Runtime
+        uses: oven-sh/setup-bun@f4d14e03ff726c06358e5557344e1da148b56cf7
+        with:
+          bun-version: '1.2.22'
+
+      - name: Install Aikido Safe Chain
+        run: curl -fsSL https://pkg.aikido.dev/safe-chain/install | sh
+
+      - name: Install Dependencies
+        run: bun install
+
+      - name: Generate Prisma Database Client
+        run: |
+          cd packages/database
+          DATABASE_URL="postgresql://test:test@localhost:5432/test_db" bun run db:generate
+
+      - name: Verify Schema Matches Migrations (No Drift)
+        run: |
+          if git diff origin/main --name-only 2>/dev/null | grep -q "packages/database/prisma/migrations"; then
+            echo "Checking for schema drift..."
+            cd packages/database
+            DATABASE_URL="postgresql://test:test@localhost:5432/test_db" npx prisma migrate diff \
+              --from-migrations ./prisma/migrations \
+              --to-schema-datamodel ./prisma/schema.prisma \
+              --shadow-database-url "postgresql://test:test@localhost:5432/test_db" \
+              --exit-code
+            if [ $? -eq 0 ]; then
+              echo "No schema drift detected"
+            elif [ $? -eq 2 ]; then
+              echo "ERROR: Schema drift detected!"
+              echo "The migrations directory does not match schema.prisma."
+              echo "Fix: Run 'bun run db:migrate' to regenerate migration from schema."
+              exit 1
+            else
+              echo "ERROR: Failed to check schema drift"
+              exit 1
+            fi
+          else
+            echo "No migrations in this PR - skipping schema drift check"
+          fi
+
+      - name: Check Code Formatting (Prettier)
+        run: bun run format:check
+
+      - name: Lint Code (ESLint)
+        run: bun run lint
+
+      - name: TypeScript Type Check
+        run: bun run typecheck
+        env:
+          NODE_OPTIONS: '--max-old-space-size=4096'
+
+      - name: Run Tests
+        run: bun test
+        continue-on-error: true

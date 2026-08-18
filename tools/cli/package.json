@@ -1,0 +1,43 @@
+{
+  "name": "@app/cli",
+  "version": "0.1.0",
+  "description": "CLI for development tasks and data seeding",
+  "private": true,
+  "type": "module",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "bin": {
+    "app": "./bin/run.js"
+  },
+  "scripts": {
+    "build": "tsc",
+    "dev": "./bin/run.js",
+    "seed": "./bin/run.js seed",
+    "seed:reset": "./bin/run.js seed reset",
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@app/database": "workspace:*",
+    "@faker-js/faker": "^9.3.0",
+    "@oclif/core": "^4.0.0",
+    "@oclif/plugin-help": "^6.2.0",
+    "cli-progress": "^3.12.0"
+  },
+  "devDependencies": {
+    "@types/cli-progress": "^3.11.6",
+    "@types/node": "^25.0.3",
+    "typescript": "^5.7.2"
+  },
+  "oclif": {
+    "bin": "app",
+    "dirname": "app",
+    "commands": {
+      "strategy": "pattern",
+      "target": "./src/commands"
+    },
+    "topicSeparator": " ",
+    "plugins": [
+      "@oclif/plugin-help"
+    ]
+  }
+}

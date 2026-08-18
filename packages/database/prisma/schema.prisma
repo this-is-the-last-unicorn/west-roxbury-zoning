@@ -1,0 +1,143 @@
+generator client {
+  provider        = "prisma-client-js"
+  previewFeatures = ["postgresqlExtensions"]
+}
+
+datasource db {
+  provider   = "postgresql"
+  extensions = [pg_trgm]
+}
+
+// =============================================================================
+// PARCEL DATA (pre-computed by data pipeline)
+// =============================================================================
+
+model Parcel {
+  gisId            String  @id @map("gis_id")
+  address          String
+  stNum            String? @map("st_num")
+  stName           String? @map("st_name")
+  proposedDistrict String? @map("proposed_district")
+  currentDistrict  String? @map("current_district")
+  lotSizeSf        Float?  @map("lot_size_sf")
+  lotTier          String? @map("lot_tier")
+  applicableTable  String? @map("applicable_table")
+  isNonResidential Boolean @default(false) @map("is_non_residential")
+  isCondo          Boolean @default(false) @map("is_condo")
+
+  results ParcelResult?
+
+  @@index([address], name: "idx_parcels_address")
+  @@index([stName], name: "idx_parcels_st_name")
+  @@map("parcels")
+}
+
+model ParcelResult {
+  gisId           String   @id @map("gis_id")
+  summary         Json?
+  comparison      Json?
+  outcomes        Json?
+  nonconformity   Json?
+  confidence      Json?
+  qaAnswers       Json?    @map("qa_answers")
+  easementBonus   Json?    @map("easement_bonus")
+  stories         Json?
+  blockId         String?  @map("block_id")
+  pipelineVersion String?  @map("pipeline_version")
+  computedAt      DateTime @default(now()) @map("computed_at")
+
+  parcel Parcel     @relation(fields: [gisId], references: [gisId], onDelete: Cascade)
+  block  BlockStat? @relation(fields: [blockId], references: [blockId])
+
+  @@index([blockId], name: "idx_parcel_results_block")
+  @@map("parcel_results")
+}
+
+// =============================================================================
+// AGGREGATE STATS (pre-computed by data pipeline)
+// =============================================================================
+
+model BlockStat {
+  blockId       String  @id @map("block_id")
+  street        String?
+  boundsLabel   String? @map("bounds_label")
+  parcelCount   Int?    @map("parcel_count")
+  districts     Json?
+  stats         Json?
+  characterDist Json?   @map("character_dist")
+  roofDist      Json?   @map("roof_dist")
+  lotVariation  Json?   @map("lot_variation")
+  propertyList  Json?   @map("property_list")
+
+  parcels ParcelResult[]
+
+  @@map("block_stats")
+}
+
+model StreetStat {
+  slug        String @id
+  streetName  String @map("street_name")
+  parcelCount Int?   @map("parcel_count")
+  districts   Json?
+  stats       Json?
+  blockIds    Json?  @map("block_ids")
+
+  @@map("street_stats")
+}
+
+model AreaStat {
+  slug        String @id
+  areaName    String @map("area_name")
+  parcelCount Int?   @map("parcel_count")
+  districts   Json?
+  stats       Json?
+
+  @@map("area_stats")
+}
+
+// =============================================================================
+// USER-SUBMITTED DATA
+// =============================================================================
+
+model Correction {
+  id           Int      @id @default(autoincrement())
+  gisId        String?  @map("gis_id")
+  description  String
+  contactEmail String?  @map("contact_email")
+  status       String   @default("pending")
+  createdAt    DateTime @default(now()) @map("created_at")
+
+  @@index([status], name: "idx_corrections_status")
+  @@map("corrections")
+}
+
+model Feedback {
+  id        Int      @id @default(autoincrement())
+  gisId     String?  @map("gis_id")
+  reactions Json?
+  freeText  String?  @map("free_text")
+  sessionId String?  @map("session_id")
+  createdAt DateTime @default(now()) @map("created_at")
+
+  @@map("feedback")
+}
+
+// =============================================================================
+// CONTENT
+// =============================================================================
+
+model Meeting {
+  id           Int      @id @default(autoincrement())
+  date         DateTime @db.Date
+  title        String
+  time         String?
+  location     String?
+  type         String?  @default("public_meeting")
+  cityUrl      String?  @map("city_url")
+  recordingUrl String?  @map("recording_url")
+  materialsUrl String?  @map("materials_url")
+  isPast       Boolean  @default(false) @map("is_past")
+
+  @@index([date], name: "idx_meetings_date")
+  @@map("meetings")
+}

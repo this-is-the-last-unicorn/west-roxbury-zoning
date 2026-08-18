@@ -1,0 +1,118 @@
+name: Claude Code Review
+
+on:
+  pull_request:
+    types: [opened, synchronize]
+
+jobs:
+  claude-review:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      pull-requests: write
+      issues: read
+      id-token: write
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@08eba0b27e820071cde6df949e0beb9ba4906955
+        with:
+          fetch-depth: 0
+
+      - name: Post initial review comment
+        id: initial-comment
+        run: |
+          COMMENT_BODY="🔍 **Claude Code Review In Progress**
+
+          ⏳ Starting automated code review...
+
+          This comment will be updated with findings as the review progresses.
+
+          ---
+          *Review started at $(date -u '+%Y-%m-%d %H:%M:%S UTC')*"
+
+          gh pr comment ${{ github.event.pull_request.number }} --body "$COMMENT_BODY" > comment_url.txt
+
+          COMMENT_ID=$(gh api "repos/${{ github.repository }}/issues/${{ github.event.pull_request.number }}/comments" | jq -r '.[-1].id')
+          echo "comment_id=$COMMENT_ID" >> $GITHUB_OUTPUT
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Run Claude Code Review
+        id: claude-review
+        uses: anthropics/claude-code-action@90d189f3abd48655ec3e2c67c552cc23e92d6028
+        with:
+          anthropic_api_key: ${{ secrets.ANTHROPIC_API_KEY }}
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          prompt: |
+            You are reviewing GitHub PR #${{ github.event.pull_request.number }} automatically triggered by a GitHub Action.
+
+            IMPORTANT SETUP:
+            1. There's already a "review in progress" comment posted (ID: ${{ steps.initial-comment.outputs.comment_id }})
+            2. You should UPDATE that existing comment throughout your review process
+            3. Start by updating it to show you're beginning analysis
+
+            REVIEW PROCESS:
+            1. First, update the comment to show you're analyzing: `gh api -X PATCH "repos/${{ github.repository }}/issues/comments/${{ steps.initial-comment.outputs.comment_id }}" -f body="🔍 **Claude Code Review In Progress**
+
+            📋 Analyzing PR changes...
+
+            ---
+            *Review started*"`
+
+            2. Get PR details: `gh pr view ${{ github.event.pull_request.number }}`
+            3. Get code changes: `gh pr diff ${{ github.event.pull_request.number }}`
+
+            4. Update comment to show you're reviewing: `gh api -X PATCH "repos/${{ github.repository }}/issues/comments/${{ steps.initial-comment.outputs.comment_id }}" -f body="🔍 **Claude Code Review In Progress**
+
+            🔍 Reviewing code changes...
+            - Checking code quality and best practices
+            - Looking for potential bugs or issues
+            - Analyzing TypeScript usage
+
+            ---
+            *Please wait while review completes...*"`
+
+            5. Conduct your review focusing on:
+               - Code quality and best practices
+               - Potential bugs or issues
+               - Performance considerations
+               - Security concerns
+               - Test coverage
+               - TypeScript Standards (CRITICAL): NEVER allow 'any' type usage
+               - Enforce strict typing and interfaces
+               - Flag missing type annotations
+
+            6. Finally, update the comment with your complete review findings using:
+            `gh api -X PATCH "repos/${{ github.repository }}/issues/comments/${{ steps.initial-comment.outputs.comment_id }}" -f body="✅ **Claude Code Review Complete**
+
+            **TL;DR**: [Concise 1–2 sentence summary of the review]
+
+            <details>
+              <summary>Full review details</summary>
+
+
+              - Key issues, suggestions, and notes
+              - Reference code snippets and diffs as needed
+              - Performance, security, and testing considerations
+
+              If no significant issues are found, summarize what looks good and any minor nits.
+            </details>
+
+            ---
+            *Review completed at $(date -u '+%Y-%m-%d %H:%M:%S UTC')*"`
+
+            GUIDELINES:
+            - Be constructive and helpful in feedback
+            - Provide specific, actionable suggestions
+            - Include code examples for improvements
+            - Do NOT block merges - this is advisory only
+            - Always update the existing comment rather than creating new ones
+            - If no significant issues found, provide positive feedback
+
+            FORMATTING REQUIREMENTS (CRITICAL):
+            - Place the TL;DR at the very top as a bold label followed by a concise summary
+            - Wrap ALL remaining detailed content in a collapsible block using `<details>` with a `<summary>` label (e.g., "Full review details"). Place all detailed analysis inside the details block
+            - Preserve lists and code formatting inside the collapsible block
+
+          claude_args: '--allowed-tools "Bash(gh issue view:*),Bash(gh search:*),Bash(gh issue list:*),Bash(gh pr comment:*),Bash(gh pr diff:*),Bash(gh pr view:*),Bash(gh pr list:*),Bash(gh api:*)"'

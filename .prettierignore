@@ -1,0 +1,34 @@
+# Dependencies
+node_modules/
+*/node_modules/
+
+# Build outputs
+.next/
+dist/
+build/
+out/
+
+# Prisma generated
+node_modules/.prisma/
+
+# Package manager
+bun.lock
+package-lock.json
+yarn.lock
+pnpm-lock.yaml
+
+# Turborepo
+.turbo/
+
+# Coverage
+coverage/
+
+# IDE
+.idea/
+.vscode/
+
+# Logs
+*.log
+
+# Render Blueprint (has [project] placeholders)
+render.yaml

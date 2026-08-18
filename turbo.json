@@ -1,0 +1,43 @@
+{
+  "$schema": "https://turbo.build/schema.json",
+  "tasks": {
+    "build": {
+      "dependsOn": ["^build", "@app/database#db:generate"],
+      "inputs": ["src/**", "package.json", "tsconfig.json"],
+      "outputs": ["dist/**", ".next/**", "!.next/cache/**"],
+      "env": ["NODE_ENV", "DATABASE_URL", "BETTER_AUTH_*", "NEXT_PUBLIC_*", "SENTRY_*"]
+    },
+    "@app/database#db:generate": {
+      "inputs": ["prisma/schema.prisma"],
+      "outputs": ["../../node_modules/.prisma/**", "../../node_modules/@prisma/client/**"]
+    },
+    "db:generate": {
+      "cache": false
+    },
+    "typecheck": {
+      "dependsOn": ["^build"],
+      "inputs": ["src/**", "package.json", "tsconfig.json"],
+      "outputs": []
+    },
+    "lint": {
+      "inputs": [
+        "src/**",
+        "*.config.js",
+        "*.config.ts",
+        "*.config.mjs",
+        "eslint.config.js",
+        "eslint.config.mjs"
+      ],
+      "outputs": []
+    },
+    "dev": {
+      "cache": false,
+      "persistent": true
+    },
+    "test": {
+      "inputs": ["src/**", "__tests__/**", "package.json"],
+      "outputs": []
+    }
+  },
+  "ui": "tui"
+}

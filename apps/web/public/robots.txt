@@ -1,0 +1,19 @@
+# West Roxbury Zoning Analysis — westroxburyzoning.org
+# Open source civic data project. All data is public.
+# We welcome crawlers, AI agents, and developers.
+
+User-agent: *
+Allow: /
+
+# Public API — free, no key required, 100 req/min
+# GET /api/search?q=ADDRESS
+# GET /api/property/GIS_ID
+# GET /api/street/SLUG
+# GET /api/block/BLOCK_ID
+# GET /api/area/SLUG
+# GET /api/overview
+# GET /api/meetings
+#
+# Full docs: https://github.com/the-last-unicorn/west-roxbury-zoning#api-endpoints
+
+Sitemap: https://westroxburyzoning.org/sitemap.xml
