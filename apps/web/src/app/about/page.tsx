@@ -110,7 +110,7 @@ export default function AboutPage() {
               something is wrong, you can check our work — or submit a fix.
             </p>
             <a
-              href='https://github.com/the-last-unicorn/west-roxbury-zoning'
+              href='https://github.com/this-is-the-last-unicorn/west-roxbury-zoning'
               target='_blank'
               rel='noopener noreferrer'
               className='inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-[#0F172A] text-white text-sm font-medium hover:bg-[#1E293B] transition-colors'
@@ -232,7 +232,7 @@ export default function AboutPage() {
             <p className='text-sm text-[#475569]'>
               Full endpoint list and response formats are in the{' '}
               <a
-                href='https://github.com/the-last-unicorn/west-roxbury-zoning#api-endpoints'
+                href='https://github.com/this-is-the-last-unicorn/west-roxbury-zoning#api-endpoints'
                 target='_blank'
                 rel='noopener noreferrer'
                 className='underline text-[#2E5090]'
@@ -282,7 +282,7 @@ export default function AboutPage() {
             <p className='text-sm'>
               If you build something with this data, we&apos;d love to hear about it —{' '}
               <a
-                href='https://github.com/the-last-unicorn/west-roxbury-zoning/issues'
+                href='https://github.com/this-is-the-last-unicorn/west-roxbury-zoning/issues'
                 target='_blank'
                 rel='noopener noreferrer'
                 className='underline text-[#2E5090]'

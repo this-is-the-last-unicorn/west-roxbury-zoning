@@ -212,7 +212,7 @@ When confidence falls below 90%, the site shows **"Needs property-specific revie
 
 **License:** MIT
 
-Repository: `github.com/the-last-unicorn/west-roxbury-zoning`
+Repository: `github.com/this-is-the-last-unicorn/west-roxbury-zoning`
 Domain: `westroxburyzoning.org`
 
 ---

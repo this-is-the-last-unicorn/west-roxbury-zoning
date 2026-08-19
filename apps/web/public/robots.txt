@@ -14,6 +14,6 @@ Allow: /
 # GET /api/overview
 # GET /api/meetings
 #
-# Full docs: https://github.com/the-last-unicorn/west-roxbury-zoning#api-endpoints
+# Full docs: https://github.com/this-is-the-last-unicorn/west-roxbury-zoning#api-endpoints
 
 Sitemap: https://westroxburyzoning.org/sitemap.xml

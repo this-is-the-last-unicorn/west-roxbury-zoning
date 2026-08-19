@@ -9,7 +9,7 @@
     "build": "bun build src/server.ts --outdir ./dist --target node",
     "db:generate": "echo 'db:generate handled by turbo at root'",
     "start": "node dist/server.js",
-    "typecheck": "tsc --noEmit",
+    "typecheck": "bun x tsc --noEmit",
     "lint": "eslint src --ext .ts"
   },
   "dependencies": {

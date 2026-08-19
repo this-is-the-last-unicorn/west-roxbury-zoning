@@ -30,5 +30,8 @@ coverage/
 # Logs
 *.log
 
-# Render Blueprint (has [project] placeholders)
+# Generated data files
+apps/web/public/parcels.geojson
+
+# Render Blueprint
 render.yaml

@@ -60,7 +60,6 @@
   "devDependencies": {
     "@playwright/test": "^1.62.1",
     "@types/node": "^26.2.0",
-    "@typescript/native": "npm:typescript@7.0.2",
     "husky": "^9.1.7",
     "lint-staged": "^17.3.0",
     "playwright": "^1.62.1",

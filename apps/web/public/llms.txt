@@ -57,8 +57,8 @@ MFR: Multifamily, no unit cap (67 parcels)
 - 9,008 parcels have a proposed residential zoning change
 - 156 Bellevue ST (GIS_ID: 2002226000) is proposed as RD-3
 - District assignment is via spatial join against city's official GIS polygon layer
-- All code and calculations: github.com/the-last-unicorn/west-roxbury-zoning
+- All code and calculations: github.com/this-is-the-last-unicorn/west-roxbury-zoning
 
 > Source code
-https://github.com/the-last-unicorn/west-roxbury-zoning
+https://github.com/this-is-the-last-unicorn/west-roxbury-zoning
 MIT License — use freely with attribution.

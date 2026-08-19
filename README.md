@@ -17,7 +17,7 @@ No login, no cookies, no ads. All data is from public government sources. All co
 
 ## Data Sources
 
-Every number on the site traces back to a government data source. If you find an error, [open an issue](https://github.com/the-last-unicorn/west-roxbury-zoning/issues).
+Every number on the site traces back to a government data source. If you find an error, [open an issue](https://github.com/this-is-the-last-unicorn/west-roxbury-zoning/issues).
 
 | Source                                              | What We Use It For                                                                  | URL                                                                                                                                                                            |
 | --------------------------------------------------- | ----------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
@@ -173,7 +173,7 @@ To add new spot checks, update `SPOT_CHECKS` in `validate_pipeline()` in `tools/
 
 ```bash
 # 1. Clone and install dependencies
-git clone https://github.com/the-last-unicorn/west-roxbury-zoning.git
+git clone https://github.com/this-is-the-last-unicorn/west-roxbury-zoning.git
 cd west-roxbury-zoning
 bun install
 
