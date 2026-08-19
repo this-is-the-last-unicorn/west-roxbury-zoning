@@ -114,9 +114,9 @@ const CURRENT_ZONING: Record<string, any> = {
     max_stories: 2.5,
     max_units: 1,
     min_front_yard: 20,
-    min_side_cumulative: 15,
+    min_side_cumulative: 20,
     min_rear_yard: 30,
-    max_lot_coverage: 0.35,
+    max_lot_coverage: null,
     min_parking: 2,
     min_permeable: null,
   },
@@ -127,7 +127,7 @@ const CURRENT_ZONING: Record<string, any> = {
     min_front_yard: 20,
     min_side_cumulative: 15,
     min_rear_yard: 30,
-    max_lot_coverage: 0.35,
+    max_lot_coverage: null,
     min_parking: 2,
     min_permeable: null,
   },
@@ -138,7 +138,7 @@ const CURRENT_ZONING: Record<string, any> = {
     min_front_yard: 15,
     min_side_cumulative: 10,
     min_rear_yard: 25,
-    max_lot_coverage: 0.4,
+    max_lot_coverage: null,
     min_parking: 2,
     min_permeable: null,
   },
@@ -389,8 +389,11 @@ describe('Spot check: 156 Bellevue ST (1F-6000 → RD-3)', () => {
     expect(getSetback(proposed, 'min_rear_yard', 'C')).toBe(10)
   })
 
-  it('lot coverage (Table C, large lot): 35% → 30%', () => {
-    expect(current.max_lot_coverage).toBe(0.35)
+  it('lot coverage: current has no comparable requirement', () => {
+    expect(current.max_lot_coverage).toBeNull()
+  })
+
+  it('lot coverage (Table C, large lot): 30%', () => {
     expect(getLotCoverage(proposed, lotTier, 'C')).toBe(0.3)
   })
 
@@ -399,8 +402,8 @@ describe('Spot check: 156 Bellevue ST (1F-6000 → RD-3)', () => {
     expect(proposed.max_height).toBe(35)
   })
 
-  it('side yard stays 15ft', () => {
-    expect(current.min_side_cumulative).toBe(15)
+  it('side yard: 20 → 15 (decrease via Table C)', () => {
+    expect(current.min_side_cumulative).toBe(20)
     expect(getSetback(proposed, 'min_side_cumulative', 'C')).toBe(15)
   })
 
@@ -424,7 +427,7 @@ describe('Spot check: 1F-6000 → RD-2 (smaller lot, 4500 sf)', () => {
     expect(getEffectiveMaxUnits(proposed, table)).toBe(3)
   })
 
-  it('lot coverage (Table C, mid lot): 35% → 30%', () => {
+  it('lot coverage (Table C, mid lot): 30%', () => {
     expect(getLotCoverage(proposed, lotTier, 'C')).toBe(0.3)
   })
 
@@ -448,8 +451,74 @@ describe('Spot check: 1F-8000 → RD-3 (102 Bellevue, 27110 sf)', () => {
     expect(getEffectiveMaxUnits(proposed, table)).toBe(3)
   })
 
-  it('lot coverage: 35% → 30%', () => {
+  it('lot coverage (Table C, large lot): 30%', () => {
     expect(getLotCoverage(proposed, lotTier, 'C')).toBe(0.3)
+  })
+})
+
+// ---------------------------------------------------------------------------
+// Tests: Current zoning data accuracy (per Emily's feedback)
+// ---------------------------------------------------------------------------
+describe('Current zoning accuracy', () => {
+  it('1F-6000 side yard cumulative is 20ft (10ft per side)', () => {
+    expect(CURRENT_ZONING['1F-6000'].min_side_cumulative).toBe(20)
+  })
+
+  it('no current district has lot coverage (Article 56 has no comparable metric)', () => {
+    for (const [dist, rules] of Object.entries(CURRENT_ZONING)) {
+      expect(rules.max_lot_coverage).toBeNull()
+    }
+  })
+})
+
+// ---------------------------------------------------------------------------
+// Tests: Floor plate in proposed zoning
+// ---------------------------------------------------------------------------
+describe('Proposed floor plate', () => {
+  it('RD-2 has floor plate for both tables', () => {
+    expect(PROPOSED_ZONING['RD-2'].max_floor_plate_B).toBe(2200)
+    expect(PROPOSED_ZONING['RD-2'].max_floor_plate_C).toBe(2600)
+  })
+
+  it('RD-3 has floor plate for both tables', () => {
+    expect(PROPOSED_ZONING['RD-3'].max_floor_plate_B).toBe(2000)
+    expect(PROPOSED_ZONING['RD-3'].max_floor_plate_C).toBe(2400)
+  })
+
+  it('current zoning has no floor plate limit', () => {
+    for (const [dist, rules] of Object.entries(CURRENT_ZONING)) {
+      expect(rules.max_floor_plate ?? null).toBeNull()
+    }
+  })
+})
+
+// ---------------------------------------------------------------------------
+// Tests: Table C vs Table B value differences (asterisk footnote logic)
+// ---------------------------------------------------------------------------
+describe('Table C overrides (asterisk-worthy differences)', () => {
+  it('RD-2 rear setback: Table C (10) differs from Table B (20)', () => {
+    expect(getSetback(PROPOSED_ZONING['RD-2'], 'min_rear_yard', 'C')).toBe(10)
+    expect(getSetback(PROPOSED_ZONING['RD-2'], 'min_rear_yard', 'B')).toBe(20)
+  })
+
+  it('RD-3 rear setback: Table C (10) differs from Table B (15)', () => {
+    expect(getSetback(PROPOSED_ZONING['RD-3'], 'min_rear_yard', 'C')).toBe(10)
+    expect(getSetback(PROPOSED_ZONING['RD-3'], 'min_rear_yard', 'B')).toBe(15)
+  })
+
+  it('RD-2 side cumulative: Table C (10) differs from Table B (20)', () => {
+    expect(getSetback(PROPOSED_ZONING['RD-2'], 'min_side_cumulative', 'C')).toBe(10)
+    expect(getSetback(PROPOSED_ZONING['RD-2'], 'min_side_cumulative', 'B')).toBe(20)
+  })
+
+  it('RD-2 floor plate: Table C (2600) differs from Table B (2200)', () => {
+    expect(PROPOSED_ZONING['RD-2'].max_floor_plate_C).toBe(2600)
+    expect(PROPOSED_ZONING['RD-2'].max_floor_plate_B).toBe(2200)
+  })
+
+  it('RD-2 units: Table C gives pre-2027 bonus (3 vs 2)', () => {
+    expect(getEffectiveMaxUnits(PROPOSED_ZONING['RD-2'], 'C')).toBe(3)
+    expect(getEffectiveMaxUnits(PROPOSED_ZONING['RD-2'], 'B')).toBe(2)
   })
 })
 

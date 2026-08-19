@@ -19,19 +19,19 @@ DB_URL = os.environ.get('DATABASE_URL', 'postgresql://localhost:5432/west_roxbur
 # ─── Zoning rules from spec B11/B12 ────────────────────────────────────────────
 
 CURRENT_ZONING = {
-    '1F-6000': {'max_height': 35, 'max_stories': 2.5, 'max_units': 1, 'min_front_yard': 20, 'min_side_cumulative': 10, 'min_rear_yard': 30, 'max_lot_coverage': 0.40, 'min_parking': 2, 'max_floor_plate': None, 'min_permeable': None},
-    '1F-8000': {'max_height': 35, 'max_stories': 2.5, 'max_units': 1, 'min_front_yard': 20, 'min_side_cumulative': 15, 'min_rear_yard': 30, 'max_lot_coverage': 0.35, 'min_parking': 2, 'max_floor_plate': None, 'min_permeable': None},
-    '2F-5000': {'max_height': 35, 'max_stories': 2.5, 'max_units': 2, 'min_front_yard': 15, 'min_side_cumulative': 10, 'min_rear_yard': 30, 'max_lot_coverage': 0.45, 'min_parking': 2, 'max_floor_plate': None, 'min_permeable': None},
-    'MFR':     {'max_height': 45, 'max_stories': 3, 'max_units': None, 'min_front_yard': 15, 'min_side_cumulative': 10, 'min_rear_yard': 30, 'max_lot_coverage': 0.50, 'min_parking': 1, 'max_floor_plate': None, 'min_permeable': None},
+    '1F-6000': {'max_height': 35, 'max_stories': 2.5, 'max_units': 1, 'min_front_yard': 20, 'min_side_cumulative': 20, 'min_rear_yard': 30, 'max_lot_coverage': None, 'min_parking': 2, 'max_floor_plate': None, 'min_permeable': None},
+    '1F-8000': {'max_height': 35, 'max_stories': 2.5, 'max_units': 1, 'min_front_yard': 20, 'min_side_cumulative': 15, 'min_rear_yard': 30, 'max_lot_coverage': None, 'min_parking': 2, 'max_floor_plate': None, 'min_permeable': None},
+    '2F-5000': {'max_height': 35, 'max_stories': 2.5, 'max_units': 2, 'min_front_yard': 15, 'min_side_cumulative': 10, 'min_rear_yard': 30, 'max_lot_coverage': None, 'min_parking': 2, 'max_floor_plate': None, 'min_permeable': None},
+    'MFR':     {'max_height': 45, 'max_stories': 3, 'max_units': None, 'min_front_yard': 15, 'min_side_cumulative': 10, 'min_rear_yard': 30, 'max_lot_coverage': None, 'min_parking': 1, 'max_floor_plate': None, 'min_permeable': None},
 }
 
 # Source: Article 20, Tables B & C — Residential Zoning Draft Text Amendment, July 17, 2026
 # See docs/spec/10-data-and-calcs.md B12 for full reference with page numbers.
 #
-# The pipeline stores a SIMPLIFIED view: for table-dependent values (rear setback,
-# side yard, lot coverage), we store the Table C values because ~95% of parcels are
-# pre-2027 and use Table C. The comparison table on the property page shows the
-# Table B value when applicable_table == 'B'.
+# Table B = base dimensional regulations (new construction / no retained pre-2027 building).
+# Table C = dimensional regulations for adding dwelling unit(s) while retaining a
+#           pre-2027 building. Per Emily's review: use Table C for pre-2027 properties
+#           (the common case) and mark affected values with an asterisk.
 #
 # IMPORTANT: If you change ANY number here, cross-check against the draft text AND
 # update docs/spec/10-data-and-calcs.md B12 to match.
@@ -129,6 +129,7 @@ def get_lot_tier(lot_sf):
 
 
 def get_applicable_table(yr_built, has_building):
+    """Table C for pre-2027 buildings (most common), Table B otherwise."""
     if not has_building:
         return 'B'
     if yr_built is not None and yr_built >= 2027:
@@ -233,23 +234,29 @@ def compute_summary(parcel, current_rules, proposed_rules, table, lot_tier):
 def compute_comparison(parcel, current_rules, proposed_rules, table, lot_tier):
     """Build the four-column comparison table data."""
     rows = []
+    has_table_c_footnote = False
 
     def resolve_proposed(key):
-        """Resolve a proposed value, handling table-dependent keys."""
+        """Resolve a proposed value, handling table-dependent keys.
+        Returns (value, is_table_specific) so we can mark Table C overrides."""
         if not proposed_rules:
-            return None
-        # Try table-specific key first
+            return None, False
         table_key = f'{key}_{table}'
         if table_key in proposed_rules:
-            return proposed_rules[table_key]
-        return proposed_rules.get(key)
+            # Check if this Table C value differs from Table B
+            table_b_key = f'{key}_B'
+            table_b_val = proposed_rules.get(table_b_key, proposed_rules.get(key))
+            is_table_c_override = (table == 'C' and table_b_val != proposed_rules[table_key])
+            return proposed_rules[table_key], is_table_c_override
+        return proposed_rules.get(key), False
 
     metrics = [
         ('Height', 'max_height', 'ft'),
         ('Stories', 'max_stories', ''),
         ('Dwelling Units', 'max_units', ''),
+        ('Building Floor Plate', 'max_floor_plate', 'sf'),
         ('Front Setback', 'min_front_yard', 'ft'),
-        ('Side Yard (cumul.)', 'min_side_cumulative', 'ft'),
+        ('Side Yards (combined)', 'min_side_cumulative', 'ft'),
         ('Rear Setback', 'min_rear_yard', 'ft'),
         ('Lot Coverage', 'max_lot_coverage', '%'),
         ('Off-Street Parking', 'min_parking', 'spaces'),
@@ -258,7 +265,7 @@ def compute_comparison(parcel, current_rules, proposed_rules, table, lot_tier):
 
     for label, key, unit in metrics:
         cur_val = current_rules.get(key) if current_rules else None
-        prop_val = resolve_proposed(key)
+        prop_val, is_table_c_override = resolve_proposed(key)
 
         # Handle dict values (lot coverage by tier)
         if isinstance(cur_val, dict):
@@ -269,10 +276,16 @@ def compute_comparison(parcel, current_rules, proposed_rules, table, lot_tier):
         # Special: units with pre-2027
         if key == 'max_units' and proposed_rules and table == 'C':
             prop_val = get_effective_max_units(proposed_rules, table)
+            is_table_c_override = (prop_val != proposed_rules.get('max_units'))
 
         # Format display values
+        is_side_yard = key == 'min_side_cumulative'
         if cur_val is not None and unit == '%':
             cur_display = f'{cur_val*100:.0f}%'
+        elif cur_val is not None and unit == 'sf':
+            cur_display = f'{int(cur_val):,} sf'
+        elif cur_val is not None and is_side_yard:
+            cur_display = f'{cur_val}ft total'
         elif cur_val is not None:
             cur_display = f'{cur_val}{unit}'
         else:
@@ -280,10 +293,18 @@ def compute_comparison(parcel, current_rules, proposed_rules, table, lot_tier):
 
         if prop_val is not None and unit == '%':
             prop_display = f'{prop_val*100:.0f}%'
+        elif prop_val is not None and unit == 'sf':
+            prop_display = f'{int(prop_val):,} sf'
+        elif prop_val is not None and is_side_yard:
+            prop_display = f'{prop_val}ft total'
         elif prop_val is not None:
             prop_display = f'{prop_val}{unit}'
         else:
             prop_display = '—'
+
+        if is_table_c_override:
+            prop_display += ' *'
+            has_table_c_footnote = True
 
         change = None
         if cur_val is not None and prop_val is not None:
@@ -298,7 +319,7 @@ def compute_comparison(parcel, current_rules, proposed_rules, table, lot_tier):
             'change': change,
         })
 
-    return rows
+    return rows, has_table_c_footnote
 
 
 def load_proposed_zoning():
@@ -444,7 +465,10 @@ def build_parcels(features, assessor, proposed_zones):
 
         # Compute analysis
         summary = compute_summary({}, current_rules, proposed_rules, applicable_table, lot_tier) if proposed_rules else []
-        comparison = compute_comparison({}, current_rules, proposed_rules, applicable_table, lot_tier) if proposed_rules else []
+        if proposed_rules:
+            comparison, has_table_c_note = compute_comparison({}, current_rules, proposed_rules, applicable_table, lot_tier)
+        else:
+            comparison, has_table_c_note = [], False
 
         parcel_data = {
             'gis_id': gis_id,

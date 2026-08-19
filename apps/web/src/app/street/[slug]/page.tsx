@@ -117,7 +117,6 @@ function computeChangeSummary(properties: Property[], streetName: string) {
   }
 
   const lines: { heading: string; detail: string }[] = []
-  const total = residential.length
 
   if (metrics.units) {
     const maxUnits = metrics.units.texts.some(t => t.includes('to 4'))
@@ -133,7 +132,7 @@ function computeChangeSummary(properties: Property[], streetName: string) {
 
     lines.push({
       heading: `Each property owner could choose to add units — up to ${maxUnits} total per lot`,
-      detail: `${unitCount} of ${total} properties on ${streetName} could go from single-family to up to ${maxUnits} units. If every eligible owner chose to maximize, that's ${potentialNew} additional units — but this is an upper bound, not a prediction. No one is required to add anything. Today, most of these lots allow only a single-family dwelling.`,
+      detail: `${unitCount} of ${properties.length} properties on ${streetName} could go from single-family to up to ${maxUnits} units. If every eligible owner chose to maximize, that's ${potentialNew} additional units — but this is an upper bound, not a prediction. No one is required to add anything. Today, most of these lots allow only a single-family dwelling.`,
     })
   }
 

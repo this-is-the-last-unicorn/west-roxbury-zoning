@@ -101,8 +101,9 @@ const METRIC_EXPLAIN: Record<string, string> = {
   Height: 'Maximum building height allowed',
   Stories: 'How many floors a building can have',
   'Dwelling Units': 'How many separate units can be on this lot',
+  'Building Floor Plate': 'Maximum footprint per floor of the building',
   'Front Setback': 'Minimum distance from house to street',
-  'Side Yard (cumul.)': 'Combined minimum distance from house to both side property lines',
+  'Side Yards (combined)': 'Total of left + right side yard minimums (not per side)',
   'Rear Setback': 'Minimum distance from house to back property line',
   'Lot Coverage': 'Maximum % of lot that can be covered by buildings',
   'Off-Street Parking': 'Required off-street parking spaces',
@@ -157,7 +158,18 @@ export default async function PropertyPage({ params }: { params: Promise<{ gisId
           {parcel.lotSizeSf ? ` · ${Math.round(parcel.lotSizeSf).toLocaleString()} sq ft lot` : ''}
         </p>
         {parcel.proposedDistrict && (
-          <p className='mt-1 text-sm text-[#2E5090] font-medium'>Proposed change: {propPlain}</p>
+          <p className='mt-1 text-sm text-[#2E5090] font-medium'>
+            Proposed district: {parcel.proposedDistrict} — {propPlain}
+            {' · '}
+            <a
+              href='https://storymaps.arcgis.com/stories/b11ef3fe8db6400d82b1e7bb8880cadd'
+              target='_blank'
+              rel='noopener noreferrer'
+              className='underline hover:text-[#1B2A4A]'
+            >
+              View city&apos;s proposed zoning map
+            </a>
+          </p>
         )}
       </div>
 
@@ -344,8 +356,51 @@ export default async function PropertyPage({ params }: { params: Promise<{ gisId
               <p className='text-xs text-[#94A3B8] mt-2 italic'>
                 Highlighted rows indicate a change. ↑ = allows more, ↓ = allows less.
               </p>
+              {comparison.some(r => r.proposedLaw.includes('*')) && (
+                <p className='text-xs text-[#64748B] mt-1'>
+                  * With the addition of dwelling units while retaining the existing building. New
+                  construction values may differ.
+                </p>
+              )}
             </section>
           )}
+
+          {/* ADU eligibility */}
+          {parcel.proposedDistrict &&
+            ['RD-2', 'RD-3', 'RD-4', 'RD-6'].includes(parcel.proposedDistrict) && (
+              <section className='mb-8'>
+                <h2 className='text-xl font-semibold mb-2'>
+                  Accessory Dwelling Unit (ADU) Eligibility
+                </h2>
+                <div className='bg-[#F8FAFC] rounded-lg border border-[#E2E8F0] p-5'>
+                  <p className='text-sm text-[#475569] mb-3'>
+                    Under the proposal, this property{' '}
+                    {parcel.proposedDistrict === 'RD-2' ? (
+                      <span className='font-medium text-[#0F172A]'>
+                        could build a detached ADU by right
+                      </span>
+                    ) : (
+                      <span className='font-medium text-[#0F172A]'>
+                        could build a detached ADU with a conditional-use permit
+                      </span>
+                    )}
+                    , in addition to the main dwelling.
+                  </p>
+                  <ul className='text-sm text-[#475569] space-y-1.5 list-disc list-inside'>
+                    <li>Max floor plate: 900 sf (or main building footprint, whichever is less)</li>
+                    <li>Max height: 25 ft (or main building height, whichever is less)</li>
+                    <li>Max 2 stories (second must be a sloped-roof story)</li>
+                    <li>Must be at least 5 ft from any other structure on the lot</li>
+                    <li>One detached ADU per lot</li>
+                    <li>Owner-occupancy is no longer required</li>
+                  </ul>
+                  <p className='text-xs text-[#94A3B8] mt-3 italic'>
+                    Non-detached ADUs (units within an existing building) count toward the
+                    district&apos;s unit maximum shown in the table above.
+                  </p>
+                </div>
+              </section>
+            )}
 
           {/* Neighbors */}
           {parcel.stName && (

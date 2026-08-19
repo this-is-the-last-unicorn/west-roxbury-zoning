@@ -59,12 +59,15 @@ describe('GET /api/property/:gisId', () => {
       'Stories',
       'Dwelling Units',
       'Front Setback',
-      'Side Yard (cumul.)',
       'Rear Setback',
       'Lot Coverage',
       'Off-Street Parking',
       'Permeable Area',
     ]
+    // Side yard metric was renamed; accept either old or new name
+    const hasSideYard =
+      metrics.includes('Side Yards (combined)') || metrics.includes('Side Yard (cumul.)')
+    expect(hasSideYard).toBe(true)
     for (const m of required) {
       expect(metrics).toContain(m)
     }
