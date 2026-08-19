@@ -1,5 +1,6 @@
 import type { Metadata } from 'next'
 import { Inter } from 'next/font/google'
+import Script from 'next/script'
 import { Toaster } from 'sonner'
 import { Nav } from '@/components/nav'
 import { Footer } from '@/components/footer'
@@ -36,6 +37,14 @@ export default function RootLayout({
 }>) {
   return (
     <html lang='en'>
+      <head>
+        <Script
+          defer
+          src='https://cloud.umami.is/script.js'
+          data-website-id='8358699a-30de-4121-a47f-b1524291cb88'
+          strategy='afterInteractive'
+        />
+      </head>
       <body className={`${inter.variable} font-sans antialiased bg-white text-[#0F172A]`}>
         <div className='min-h-screen flex flex-col'>
           <Nav />
