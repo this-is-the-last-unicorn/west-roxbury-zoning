@@ -10,7 +10,6 @@ services:
     runtime: node
     region: oregon
     plan: standard
-    numInstances: 1
     scaling:
       minInstances: 1
       maxInstances: 3
@@ -36,7 +35,6 @@ services:
     runtime: node
     region: oregon
     plan: standard
-    numInstances: 1
     scaling:
       minInstances: 1
       maxInstances: 3
