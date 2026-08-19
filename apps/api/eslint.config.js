@@ -21,6 +21,7 @@ export default [
         module: 'readonly',
         require: 'readonly',
         crypto: 'readonly',
+        fetch: 'readonly',
       },
     },
     plugins: {

@@ -1,5 +1,6 @@
 import { Router } from 'express'
 import { prisma } from '@app/database'
+import { notifySlack } from '../lib/slack.js'
 
 export const feedbackRouter = Router()
 
@@ -19,6 +20,12 @@ feedbackRouter.post('/', async (req, res) => {
         sessionId: sessionId || null,
       },
     })
+
+    if (freeText) {
+      await notifySlack({
+        text: `💬 *[Feedback]* #${feedback.id}\n\n${freeText.trim()}${gisId ? `\n*Property:* <https://westroxburyzoning.org/property/${gisId}|${gisId}>` : ''}${reactions ? `\n*Reactions:* ${reactions}` : ''}`,
+      })
+    }
 
     return res.status(201).json({ id: feedback.id })
   } catch (_err) {
