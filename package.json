@@ -67,6 +67,9 @@
     "turbo": "^2.10.10",
     "typescript": "5.9.3"
   },
+  "overrides": {
+    "deepmerge-ts": "8.0.0"
+  },
   "dependencies": {
     "@eslint/eslintrc": "^3.3.6",
     "@eslint/js": "^10.0.1",
