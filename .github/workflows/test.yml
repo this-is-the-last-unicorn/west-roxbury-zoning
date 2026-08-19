@@ -29,7 +29,11 @@ jobs:
           bun-version: '1.2.22'
 
       - name: Install Aikido Safe Chain
-        run: curl -fsSL https://pkg.aikido.dev/safe-chain/install | sh
+        run: |
+          curl -fsSL https://pkg.aikido.dev/safe-chain/install -o /tmp/aikido-install.sh
+          sha512sum /tmp/aikido-install.sh
+          sh /tmp/aikido-install.sh
+          rm -f /tmp/aikido-install.sh
 
       - name: Install Dependencies
         run: bun install
