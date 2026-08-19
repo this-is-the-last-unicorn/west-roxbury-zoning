@@ -15,6 +15,7 @@ import { overviewRouter } from './routes/overview'
 import { meetingsRouter } from './routes/meetings'
 import { correctionsRouter } from './routes/corrections'
 import { feedbackRouter } from './routes/feedback'
+import { privacyRouter } from './routes/privacy'
 import { readLimiter, writeLimiter } from './middleware/rate-limit'
 
 const app = express()
@@ -43,6 +44,7 @@ app.use('/api/meetings', readLimiter, meetingsRouter)
 // Write routes (tighter limits)
 app.use('/api/corrections', writeLimiter, correctionsRouter)
 app.use('/api/feedback', writeLimiter, feedbackRouter)
+app.use('/api/privacy', writeLimiter, privacyRouter)
 
 app.use((err: Error, req: express.Request, res: express.Response, _next: express.NextFunction) => {
   captureException(err, { method: req.method, url: req.url })
