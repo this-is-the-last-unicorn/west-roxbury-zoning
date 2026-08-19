@@ -69,8 +69,7 @@
   },
   "overrides": {
     "deepmerge-ts": "8.0.0",
-    "cjs-module-lexer": "2.2.0",
-    "@opentelemetry/core": "2.8.0"
+    "cjs-module-lexer": "2.2.0"
   },
   "dependencies": {
     "@eslint/eslintrc": "^3.3.6",
