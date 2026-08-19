@@ -68,7 +68,8 @@
     "typescript": "5.9.3"
   },
   "overrides": {
-    "deepmerge-ts": "8.0.0"
+    "deepmerge-ts": "8.0.0",
+    "cjs-module-lexer": "2.2.0"
   },
   "dependencies": {
     "@eslint/eslintrc": "^3.3.6",
