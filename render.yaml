@@ -9,7 +9,13 @@ services:
     name: wrz-web
     runtime: node
     region: oregon
-    plan: starter
+    plan: standard
+    numInstances: 1
+    scaling:
+      minInstances: 1
+      maxInstances: 3
+      targetCPUPercent: 70
+      targetMemoryPercent: 70
     rootDir: apps/web
     buildCommand: bun install && bun run build
     startCommand: bun run start
@@ -29,7 +35,13 @@ services:
     name: wrz-api
     runtime: node
     region: oregon
-    plan: starter
+    plan: standard
+    numInstances: 1
+    scaling:
+      minInstances: 1
+      maxInstances: 3
+      targetCPUPercent: 70
+      targetMemoryPercent: 70
     buildCommand: bun install && bun run db:generate:build && bun run build:api
     startCommand: bun run db:migrate:deploy:runtime && bun run start:api
     healthCheckPath: /api/health
@@ -52,6 +64,6 @@ databases:
   - name: wrz-db
     databaseName: west_roxbury_zoning
     user: wrz_user
-    plan: basic-256mb
+    plan: basic-1gb
     region: oregon
     postgresMajorVersion: "16"
