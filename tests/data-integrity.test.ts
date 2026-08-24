@@ -118,7 +118,7 @@ describe('Property data shape', () => {
     expect(parking.currentLaw).toMatch(/\d+spaces/)
 
     const coverage = data.results.comparison.find((r: any) => r.metric === 'Lot Coverage')
-    expect(coverage.currentLaw).toMatch(/\d+%/)
+    expect(coverage.currentLaw).toMatch(/No direct equivalent|—|\d+%/)
   })
 })
 

@@ -19,7 +19,7 @@ DB_URL = os.environ.get('DATABASE_URL', 'postgresql://localhost:5432/west_roxbur
 # ─── Zoning rules from spec B11/B12 ────────────────────────────────────────────
 
 CURRENT_ZONING = {
-    '1F-6000': {'max_height': 35, 'max_stories': 2.5, 'max_units': 1, 'min_front_yard': 20, 'min_side_cumulative': 20, 'min_rear_yard': 30, 'max_lot_coverage': None, 'min_parking': 2, 'max_floor_plate': None, 'min_permeable': None},
+    '1F-6000': {'max_height': 35, 'max_stories': 2.5, 'max_units': 1, 'min_front_yard': 20, 'min_side_cumulative': 20, 'min_side_per_side': 10, 'min_rear_yard': 30, 'max_lot_coverage': None, 'min_parking': 2, 'max_floor_plate': None, 'min_permeable': None},
     '1F-8000': {'max_height': 35, 'max_stories': 2.5, 'max_units': 1, 'min_front_yard': 20, 'min_side_cumulative': 15, 'min_rear_yard': 30, 'max_lot_coverage': None, 'min_parking': 2, 'max_floor_plate': None, 'min_permeable': None},
     '2F-5000': {'max_height': 35, 'max_stories': 2.5, 'max_units': 2, 'min_front_yard': 15, 'min_side_cumulative': 10, 'min_rear_yard': 30, 'max_lot_coverage': None, 'min_parking': 2, 'max_floor_plate': None, 'min_permeable': None},
     'MFR':     {'max_height': 45, 'max_stories': 3, 'max_units': None, 'min_front_yard': 15, 'min_side_cumulative': 10, 'min_rear_yard': 30, 'max_lot_coverage': None, 'min_parking': 1, 'max_floor_plate': None, 'min_permeable': None},
@@ -231,8 +231,8 @@ def compute_summary(parcel, current_rules, proposed_rules, table, lot_tier):
     return changes[:4]
 
 
-def compute_comparison(parcel, current_rules, proposed_rules, table, lot_tier):
-    """Build the four-column comparison table data."""
+def compute_comparison(parcel, current_rules, proposed_rules, table, lot_tier, actuals=None):
+    """Build the comparison table data. If actuals dict is provided, includes yourProperty column."""
     rows = []
     has_table_c_footnote = False
 
@@ -285,9 +285,15 @@ def compute_comparison(parcel, current_rules, proposed_rules, table, lot_tier):
         elif cur_val is not None and unit == 'sf':
             cur_display = f'{int(cur_val):,} sf'
         elif cur_val is not None and is_side_yard:
-            cur_display = f'{cur_val}ft total'
+            per_side = current_rules.get('min_side_per_side') if current_rules else None
+            if per_side:
+                cur_display = f'{per_side} ft/side ({cur_val} ft total)'
+            else:
+                cur_display = f'{cur_val} ft total'
         elif cur_val is not None:
             cur_display = f'{cur_val}{unit}'
+        elif key == 'max_lot_coverage':
+            cur_display = 'No direct equivalent'
         else:
             cur_display = '—'
 
@@ -312,12 +318,25 @@ def compute_comparison(parcel, current_rules, proposed_rules, table, lot_tier):
             if abs(diff) > 0.001:
                 change = 'increase' if diff > 0 else 'decrease'
 
-        rows.append({
+        row = {
             'metric': label,
             'currentLaw': cur_display,
             'proposedLaw': prop_display,
             'change': change,
-        })
+        }
+
+        if actuals is not None:
+            actual_val = actuals.get(key)
+            if actual_val is not None and unit == '%':
+                row['yourProperty'] = f'{actual_val:.0f}%'
+            elif actual_val is not None and unit == 'sf':
+                row['yourProperty'] = f'{int(actual_val):,} sf'
+            elif actual_val is not None:
+                row['yourProperty'] = f'{actual_val}{unit}'
+            else:
+                row['yourProperty'] = None
+
+        rows.append(row)
 
     return rows, has_table_c_footnote
 
@@ -463,10 +482,21 @@ def build_parcels(features, assessor, proposed_zones):
         current_rules = CURRENT_ZONING.get(current_district)
         proposed_rules = PROPOSED_ZONING.get(proposed_district) if proposed_district else None
 
+        # Actual property measurements for "Your Property" column
+        actual_lot_cov = None
+        if building_footprint and lot_sf and lot_sf > 0:
+            actual_lot_cov = (building_footprint / lot_sf) * 100
+        actuals = {
+            'max_height': existing_height,
+            'max_units': existing_units or None,
+            'max_floor_plate': building_footprint,
+            'max_lot_coverage': actual_lot_cov,
+        }
+
         # Compute analysis
         summary = compute_summary({}, current_rules, proposed_rules, applicable_table, lot_tier) if proposed_rules else []
         if proposed_rules:
-            comparison, has_table_c_note = compute_comparison({}, current_rules, proposed_rules, applicable_table, lot_tier)
+            comparison, has_table_c_note = compute_comparison({}, current_rules, proposed_rules, applicable_table, lot_tier, actuals=actuals)
         else:
             comparison, has_table_c_note = [], False
 
