@@ -6,7 +6,13 @@ import { MessageSquare, CalendarDays, HelpCircle } from 'lucide-react'
 const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001'
 
 type Change = { metric: string; text: string; magnitude: number }
-type CompRow = { metric: string; currentLaw: string; proposedLaw: string; change: string | null }
+type CompRow = {
+  metric: string
+  currentLaw: string
+  proposedLaw: string
+  change: string | null
+  yourProperty?: string | null
+}
 
 type Parcel = {
   gisId: string
@@ -103,7 +109,7 @@ const METRIC_EXPLAIN: Record<string, string> = {
   'Dwelling Units': 'How many separate units can be on this lot',
   'Building Floor Plate': 'Maximum footprint per floor of the building',
   'Front Setback': 'Minimum distance from house to street',
-  'Side Yards (combined)': 'Total of left + right side yard minimums (not per side)',
+  'Side Yards (combined)': 'Total of left + right side yard minimums',
   'Rear Setback': 'Minimum distance from house to back property line',
   'Lot Coverage': 'Maximum % of lot that can be covered by buildings',
   'Off-Street Parking': 'Required off-street parking spaces',
@@ -303,17 +309,21 @@ export default async function PropertyPage({ params }: { params: Promise<{ gisId
           {/* Side-by-side comparison */}
           {comparison.length > 0 && (
             <section className='mb-8'>
-              <h2 className='text-xl font-semibold mb-2'>Side-by-Side: Today vs. Proposed</h2>
+              <h2 className='text-xl font-semibold mb-2'>
+                Your Property vs. Current Zoning vs. Proposed
+              </h2>
               <p className='text-sm text-[#64748B] mb-4'>
-                What the zoning rules allow now, and what they would allow under the proposal.
+                What your property actually has today, what current zoning allows, and what the
+                proposal would allow.
               </p>
-              <div className='border border-[#E2E8F0] rounded-lg overflow-hidden'>
+              <div className='border border-[#E2E8F0] rounded-lg overflow-x-auto'>
                 <table className='w-full text-sm'>
                   <thead>
                     <tr className='bg-[#1B2A4A] text-white'>
-                      <th className='text-left py-3 px-4 font-medium'>Rule</th>
-                      <th className='text-left py-3 px-4 font-medium'>Today</th>
-                      <th className='text-left py-3 px-4 font-medium'>Proposed</th>
+                      <th className='text-left py-3 px-3 font-medium'>Rule</th>
+                      <th className='text-left py-3 px-3 font-medium'>Your Property</th>
+                      <th className='text-left py-3 px-3 font-medium'>Current Zoning</th>
+                      <th className='text-left py-3 px-3 font-medium'>Proposed</th>
                     </tr>
                   </thead>
                   <tbody>
@@ -325,14 +335,17 @@ export default async function PropertyPage({ params }: { params: Promise<{ gisId
                           key={i}
                           className={`border-b border-[#E2E8F0] ${changed ? 'bg-[#EFF6FF]' : ''}`}
                         >
-                          <td className='py-3 px-4'>
+                          <td className='py-3 px-3'>
                             <span className='font-medium text-[#334155]'>{row.metric}</span>
                             {explain && (
                               <span className='block text-xs text-[#94A3B8] mt-0.5'>{explain}</span>
                             )}
                           </td>
-                          <td className='py-3 px-4 text-[#475569]'>{row.currentLaw}</td>
-                          <td className='py-3 px-4'>
+                          <td className='py-3 px-3 font-medium text-[#0F172A]'>
+                            {row.yourProperty || '—'}
+                          </td>
+                          <td className='py-3 px-3 text-[#475569]'>{row.currentLaw}</td>
+                          <td className='py-3 px-3'>
                             <span
                               className={
                                 changed ? 'font-semibold text-[#0F172A]' : 'text-[#475569]'
@@ -354,7 +367,8 @@ export default async function PropertyPage({ params }: { params: Promise<{ gisId
                 </table>
               </div>
               <p className='text-xs text-[#94A3B8] mt-2 italic'>
-                Highlighted rows indicate a change. ↑ = allows more, ↓ = allows less.
+                Highlighted rows indicate a proposed change from current zoning. ↑ = allows more, ↓
+                = allows less. &quot;Your Property&quot; shows actual data where available.
               </p>
               {comparison.some(r => r.proposedLaw.includes('*')) && (
                 <p className='text-xs text-[#64748B] mt-1'>
