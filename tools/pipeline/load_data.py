@@ -331,8 +331,13 @@ def compute_comparison(parcel, current_rules, proposed_rules, table, lot_tier, a
                 row['yourProperty'] = f'{actual_val:.0f}%'
             elif actual_val is not None and unit == 'sf':
                 row['yourProperty'] = f'{int(actual_val):,} sf'
+            elif actual_val is not None and unit == 'spaces':
+                row['yourProperty'] = f'{int(actual_val)} spaces'
+            elif actual_val is not None and unit == 'ft':
+                row['yourProperty'] = f'{actual_val}ft'
             elif actual_val is not None:
-                row['yourProperty'] = f'{actual_val}{unit}'
+                val = int(actual_val) if actual_val == int(actual_val) else actual_val
+                row['yourProperty'] = f'{val}{unit}'
             else:
                 row['yourProperty'] = None
 
@@ -486,11 +491,37 @@ def build_parcels(features, assessor, proposed_zones):
         actual_lot_cov = None
         if building_footprint and lot_sf and lot_sf > 0:
             actual_lot_cov = (building_footprint / lot_sf) * 100
+
+        existing_stories = None
+        if asr.get('RES_FLOOR'):
+            try:
+                existing_stories = float(asr['RES_FLOOR'])
+            except (ValueError, TypeError):
+                pass
+
+        existing_parking = None
+        if asr.get('NUM_PARKING'):
+            try:
+                existing_parking = int(asr['NUM_PARKING'])
+            except (ValueError, TypeError):
+                pass
+
+        actual_permeable = None
+        imp_pct = props.get('PctImperviousSurface')
+        if imp_pct is not None:
+            try:
+                actual_permeable = 100.0 - float(imp_pct)
+            except (ValueError, TypeError):
+                pass
+
         actuals = {
             'max_height': existing_height,
+            'max_stories': existing_stories,
             'max_units': existing_units or None,
             'max_floor_plate': building_footprint,
             'max_lot_coverage': actual_lot_cov,
+            'min_parking': existing_parking,
+            'min_permeable': actual_permeable,
         }
 
         # Compute analysis
